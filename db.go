@@ -13,11 +13,24 @@ type Client struct {
 	Authorized bool
 }
 
+/*
+Login      string		имя(уникальный)
+Password   string		пароль
+ID         int			айди(уникальный)
+Conn       net.Conn		соединение
+Authorized bool			флаг авторизации(true/false)
+*/
+
 func Init() []Client {
 	clients := []Client{}
 
 	return clients
 }
+
+/*
+создает и возвращает пустой лист клиентов
+инициализирует базу данных пользователей
+*/
 
 func CheckUser(log string, C []Client) bool {
 	for _, n := range C {
@@ -29,10 +42,15 @@ func CheckUser(log string, C []Client) bool {
 	return false
 }
 
+/*
+проверка на существование пользователя с уникальным логином
+возвращает true или false
+*/
+
 func AddUser(login, password string, id int, conn net.Conn, clients *[]Client) {
 	for _, n := range *clients {
 		if n.Login == login {
-			println("this login exist!")
+			fmt.Println("this login exist!")
 			return
 		}
 	}
@@ -46,6 +64,11 @@ func AddUser(login, password string, id int, conn net.Conn, clients *[]Client) {
 	})
 }
 
+/*
+добавляет нового пользователя в лист клиентов
+перед этим проверяет, не занят ли логин
+*/
+
 func SearchUser(log string, C []Client) *Client {
 	for _, n := range C {
 		if n.Login == log {
@@ -54,6 +77,11 @@ func SearchUser(log string, C []Client) *Client {
 	}
 	return nil
 }
+
+/*
+ищет пользователя по логину и возвращает указатель на найденного пользователя
+если не найден то возвращает nil (NULL)
+*/
 
 func SearchUserByID(id int, C []Client) *Client {
 	for _, n := range C {
@@ -64,6 +92,11 @@ func SearchUserByID(id int, C []Client) *Client {
 	return nil
 }
 
+/*
+ищет пользователя по уникальному айди
+также возвращает указатель на найденного пользователя или nil
+*/
+
 func AuthUser(log string, pass string, C []Client) bool {
 	for i, n := range C {
 		if n.Login == log && n.Password == pass {
@@ -73,6 +106,12 @@ func AuthUser(log string, pass string, C []Client) bool {
 	}
 	return false
 }
+
+/*
+проверяет логин и пароль пользователя
+если данные верны то устанавливает флаг auth на true,
+а так же возвращает true при успешной авторизации
+*/
 
 // func Registration_of_conn(Conn *net.Conn, log string, pass string, C []Client) {
 // 	if CheckUser(log, C) == true {
@@ -98,6 +137,22 @@ func Registration_of_conn(Conn *net.Conn, log string, pass string, C []Client) {
 	}
 }
 
+/*
+одна из основных функций
+
+CheckUser(log, C) == true					существование пользователя
+AuthUser(log, pass, C) == true				верный ли пароль
+
+x := SearchUser(log, C)						находим пользователя
+x.Conn = *Conn								устанавливаем соединение
+
+else {(*Conn).Close()}						если пароль не верный, то закрываем соединение
+
+а так же если пользователя не существует -> AuthUser(log, pass, C) == false
+AddUser(log, pass, 0, *Conn, &C)			создание нового пользователя
+AuthUser(log, pass, C)						его авторизация
+*/
+
 func Connect() net.Conn {
 	conn, err := net.Dial("tcp", "localhost:8080")
 	if err != nil {
@@ -107,8 +162,18 @@ func Connect() net.Conn {
 	return conn
 }
 
+/*
+устанавливает tcp соединение с сервером localhost:8080
+при ошибке выводит сообщение и возвращает nil
+при успехе возвращает обьект соединение
+*/
+
 func Disconnect(conn net.Conn) {
 	if conn != nil {
 		conn.Close()
 	}
 }
+
+/*
+отключение пользователя
+*/
